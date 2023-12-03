@@ -72,9 +72,6 @@ class JSONBatcher:
         all_properties = []
         self.get_all_examples_recurse(schema, all_properties, prompt_id, prefix = "")
 
-        collapsed_properties = [all_properties[i]["collapsed_property"] for i in range(len(all_properties))]
-        original_properties = [all_properties[i]["original_property"] for i in range(len(all_properties))]
-
         for properties in all_properties:
           schema = properties["collapsed_property"]
           original_property = properties["original_property"]
