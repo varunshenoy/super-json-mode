@@ -46,6 +46,23 @@ class JSONGenerator:
 
         prompt = f"""<s><<SYS>>You only respond in JSON. You do not add text before. You do not add text after. Only JSON. <</SYS>>[INST] {user_message} [/INST]"""
         return prompt
+    
+    def clean_outputs(outputs):
+  
+        generated_texts = [outputs[i][0]["generated_text"] for i in range(len(outputs))]
+
+        clean_outputs = []
+
+        for generated_text in generated_texts:
+
+          clean_generated_text = generated_text.replace("\n", "")
+          open_bracket_index = clean_generated_text.find("{")
+          close_bracket_index = clean_generated_text.find("}")
+          
+          clean_generated_text = clean_generated_text[open_bracket_index : close_bracket_index + 1]
+          clean_outputs.append(clean_generated_text)
+
+        return clean_outputs
   
     def write_outputs(self, out_dir, outputs, batch_size, **sampling_params):
 
@@ -120,6 +137,8 @@ class JSONGenerator:
 
           if out:
             self.write_outputs(out_dir, outputs, batch_size, **sampling_params)
+          
+          clean_outputs = self.clean_outputs(outputs)
 
         return outputs, evals
 
