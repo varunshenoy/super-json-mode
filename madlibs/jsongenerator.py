@@ -1,6 +1,7 @@
 import json
 from collections import defaultdict
 import time
+import os
 from tqdm import tqdm
 from torch.utils.data import Dataset
 from prettytable import PrettyTable
@@ -45,10 +46,24 @@ class JSONGenerator:
 
         prompt = f"""<s><<SYS>>You only respond in JSON. You do not add text before. You do not add text after. Only JSON. <</SYS>>[INST] {user_message} [/INST]"""
         return prompt
+  
+    def write_outputs(self, out_dir, outputs, batch_size, **sampling_params):
 
-    def run(self, generate, batch_sizes, **kwargs):
+      if not os.path.isdir(out_dir):
+        os.mkdir(out_dir)
 
-        outputs = []
+      outfile = os.path.join(out_dir, f'batch-size={batch_size}_\
+                                        max-length={sampling_params["max_length"]}_\
+                                        {self.dataset_file.split(".")[0]}_outputs.txt')
+
+      generated_texts = [outputs[i][0]["generated_text"] for i in range(len(outputs))]
+
+      with open(outfile, "a") as f:
+        f.writelines(generated_texts)
+        f.close()
+
+    def run(self, generate, batch_sizes, out = True, out_dir = os.getcwd(), **sampling_params):
+
         evals = []
 
         #dataset generator object from raw JSON file
@@ -59,7 +74,7 @@ class JSONGenerator:
         dataset = JSONDataset(data)
 
         for batch_size in batch_sizes:
-          batchwise_outputs = []
+          outputs = []
           run_times = []
 
           start_time = time.time()
@@ -67,10 +82,10 @@ class JSONGenerator:
           for out in tqdm(generate(dataset, batch_size = batch_size, **sampling_params)):
               time_taken = round(time.time() - start_time, 3)
               run_times.append(time_taken)
-              batchwise_outputs.append(out)
+              outputs.append(out)
               start_time = time.time()
 
-          for output, run_time, schema in zip(batchwise_outputs, run_times, schemas):
+          for output, run_time, schema in zip(outputs, run_times, schemas):
               evaluation = {}
 
               result = output[0]["generated_text"].strip()
@@ -101,7 +116,10 @@ class JSONGenerator:
 
               evaluation["batch_size"] = batch_size
               evals.append(evaluation)
-              outputs = outputs + batchwise_outputs
+
+
+          if out:
+            self.write_outputs(out_dir, outputs, batch_size, **sampling_params)
 
         return outputs, evals
 
