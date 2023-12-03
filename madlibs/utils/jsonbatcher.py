@@ -21,7 +21,7 @@ class JSONBatcher:
   def get_num_levels(self, schema):
      return max(self.get_num_levels_examplewise(value) if isinstance(value,dict) else 0 for value in schema.values()) + 1
   
-  def get_all_examples_recurse(self, schema, all_properties, prefix, traversed_keys : list = []):
+  def get_all_examples_recurse(self, schema, all_properties, prompt_id, prefix, traversed_keys : list = []):
     for key in schema:
       value = schema[key]
 
@@ -30,7 +30,7 @@ class JSONBatcher:
 
       if isinstance(value, dict):
 
-          self.get_all_examples_recurse(value, all_properties, prefix + "{}_".format(key), updated_traversed_keys)
+          self.get_all_examples_recurse(value, all_properties, prompt_id, prefix + "{}_".format(key), updated_traversed_keys)
       else:
           all_properties.append({
              "collapsed_property" : 
@@ -38,7 +38,8 @@ class JSONBatcher:
                 prefix + key : value
              }, 
              "original_property" : 
-             updated_traversed_keys
+             updated_traversed_keys,
+             "prompt_id" : prompt_id
           })
 
   def get_batches_recurse(self, schema, levelwise_properties, level, prefix):
@@ -63,12 +64,13 @@ class JSONBatcher:
       data = []
       schemas = []
       original_properties = []
+      prompt_ids = []
 
-      for passage_idx in range(len(self.dataset)):
-        passage = self.dataset[passage_idx]["passage"]
-        schema = self.dataset[passage_idx]["schema"]
+      for prompt_id in range(len(self.dataset)):
+        passage = self.dataset[prompt_id]["passage"]
+        schema = self.dataset[prompt_id]["schema"]
         all_properties = []
-        self.get_all_examples_recurse(schema, all_properties, prefix = "")
+        self.get_all_examples_recurse(schema, all_properties, prompt_id, prefix = "")
 
         collapsed_properties = [all_properties[i]["collapsed_property"] for i in range(len(all_properties))]
         original_properties = [all_properties[i]["original_property"] for i in range(len(all_properties))]
@@ -76,13 +78,14 @@ class JSONBatcher:
         for properties in all_properties:
           schema = properties["collapsed_property"]
           original_property = properties["original_property"]
+          prompt_id = properties["prompt_id"]
 
           data.append(generate_prompt(passage, schema))
           schemas.append(schema)
           original_properties.append(original_property)
+          prompt_ids.append(prompt_id)
           
-      
-      return data, schemas, original_properties
+      return data, schemas, original_properties, prompt_ids
 
   def get_batches(self, generate_prompt):
       batches = []

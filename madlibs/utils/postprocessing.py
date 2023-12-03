@@ -17,17 +17,13 @@ def clean_outputs(outputs):
 
   return clean_outputs
 
-def write_outputs(out_dir, outputs, batch_size, **sampling_params):
+def write_outputs(output_dir, outputs, batch_size, **sampling_params):
 
-  if not os.path.isdir(out_dir):
-    os.mkdir(out_dir)
+  if not os.path.isdir(output_dir):
+    os.mkdir(output_dir)
 
-  outfile = os.path.join(out_dir, f'batch-size={batch_size}_\
-                                    max-length={sampling_params["max_length"]}_\
-                                    {self.dataset_file.split(".")[0]}_outputs.txt')
-
-  generated_texts = [outputs[i][0]["generated_text"] for i in range(len(outputs))]
+  outfile = os.path.join(output_dir, f'batch-size={batch_size}_max-length={sampling_params["max_length"]}_jsonbench_outputs.txt')
 
   with open(outfile, "a") as f:
-    f.writelines(generated_texts)
+    f.writelines([outputs[i] + "\n" for i in range(len(outputs))])
     f.close()

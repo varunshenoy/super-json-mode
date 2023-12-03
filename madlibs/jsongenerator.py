@@ -7,7 +7,8 @@ from torch.utils.data import Dataset
 from prettytable import PrettyTable
 from itertools import islice
 import numpy as np
-from utils import JSONBatcher, JSONDataset
+from .utils import JSONBatcher, JSONDataset
+from .utils.postprocessing import *
 
 class JSONGenerator:
     def __init__(self, dataset_file):
@@ -47,9 +48,11 @@ class JSONGenerator:
         prompt = f"""<s><<SYS>>You only respond in JSON. You do not add text before. You do not add text after. Only JSON. <</SYS>>[INST] {user_message} [/INST]"""
         return prompt
     
-    def run(self, generate, batch_sizes, out = True, out_dir = os.getcwd(), **sampling_params):
+    def run(self, generate, batch_size, out = True, out_dir = os.getcwd(), **sampling_params):
 
         evals = []
+        outputs = []
+        run_times = []
 
         #dataset generator object from raw JSON file
         batcher = JSONBatcher(self.dataset_file)
@@ -58,55 +61,50 @@ class JSONGenerator:
         #Initialize Hugging Face Dataset object
         dataset = JSONDataset(data)
 
-        for batch_size in batch_sizes:
-          outputs = []
-          run_times = []
+        start_time = time.time()
 
-          start_time = time.time()
+        for out in tqdm(generate(dataset, batch_size = batch_size, **sampling_params)):
+            time_taken = round(time.time() - start_time, 3)
+            run_times.append(time_taken)
+            outputs.append(out)
+            start_time = time.time()
 
-          for out in tqdm(generate(dataset, batch_size = batch_size, **sampling_params)):
-              time_taken = round(time.time() - start_time, 3)
-              run_times.append(time_taken)
-              outputs.append(out)
-              start_time = time.time()
+        for output, run_time, schema in zip(outputs, run_times, schemas):
+            evaluation = {}
 
-          for output, run_time, schema in zip(outputs, run_times, schemas):
-              evaluation = {}
+            result = output[0]["generated_text"].strip()
+            result = result.replace("\'", "\"")
 
-              result = output[0]["generated_text"].strip()
-              result = result.replace("\'", "\"")
+            evaluation["generation"] = result
+            evaluation["time_taken"] = time_taken
 
-              evaluation["generation"] = result
-              evaluation["time_taken"] = time_taken
+            # check if result is valid JSON
+            try:
+                json_result = json.loads(result)
+                evaluation["is_valid"] = True
 
-              # check if result is valid JSON
-              try:
-                  json_result = json.loads(result)
-                  evaluation["is_valid"] = True
+                # check if result matches schema
+                # JSON might have erroneous keys
+                evaluation["matches_schema"] = self.has_matching_schema(json_result, schema)
+                evaluation["error_type"] = None
+            except ValueError:
+                evaluation["is_valid"] = False
+                evaluation["matches_schema"] = False
 
-                  # check if result matches schema
-                  # JSON might have erroneous keys
-                  evaluation["matches_schema"] = self.has_matching_schema(json_result, schema)
-                  evaluation["error_type"] = None
-              except ValueError:
-                  evaluation["is_valid"] = False
-                  evaluation["matches_schema"] = False
+                if result[0] != "{":
+                    evaluation["error_type"] = "prefix"
+                elif result[-1] != "}":
+                    evaluation["error_type"] = "suffix"
+                else:
+                    evaluation["error_type"] = "invalid"
 
-                  if result[0] != "{":
-                      evaluation["error_type"] = "prefix"
-                  elif result[-1] != "}":
-                      evaluation["error_type"] = "suffix"
-                  else:
-                      evaluation["error_type"] = "invalid"
-
-              evaluation["batch_size"] = batch_size
-              evals.append(evaluation)
+            evaluation["batch_size"] = batch_size
+            evals.append(evaluation)
 
 
-          if out:
-            self.write_outputs(out_dir, outputs, batch_size, **sampling_params)
-          
-          clean_outputs = self.clean_outputs(outputs)
+        cleaned_outputs = clean_outputs(outputs)
+        if out:
+          write_outputs('test_output_dir', cleaned_outputs, 2, **sampling_params)
 
         return outputs, evals
 
