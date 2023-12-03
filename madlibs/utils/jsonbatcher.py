@@ -5,6 +5,7 @@ from tqdm import tqdm
 from prettytable import PrettyTable
 from itertools import islice 
 import numpy as np
+import copy
 
 
 class JSONBatcher:
@@ -20,14 +21,24 @@ class JSONBatcher:
   def get_num_levels(self, schema):
      return max(self.get_num_levels_examplewise(value) if isinstance(value,dict) else 0 for value in schema.values()) + 1
   
-  def get_all_examples_recurse(self, schema, all_properties, prefix):
+  def get_all_examples_recurse(self, schema, all_properties, prefix, traversed_keys : list = []):
     for key in schema:
       value = schema[key]
+
+      updated_traversed_keys = copy.deepcopy(traversed_keys)
+      updated_traversed_keys.append(key)
+
       if isinstance(value, dict):
-          self.get_all_examples_recurse(value, all_properties, prefix + "{}_".format(key))
+
+          self.get_all_examples_recurse(value, all_properties, prefix + "{}_".format(key), updated_traversed_keys)
       else:
           all_properties.append({
-             prefix + key : value
+             "collapsed_property" : 
+             {
+                prefix + key : value
+             }, 
+             "original_property" : 
+             updated_traversed_keys
           })
 
   def get_batches_recurse(self, schema, levelwise_properties, level, prefix):
@@ -51,17 +62,27 @@ class JSONBatcher:
   def get_dataset(self, generate_prompt):
       data = []
       schemas = []
+      original_properties = []
 
       for passage_idx in range(len(self.dataset)):
         passage = self.dataset[passage_idx]["passage"]
         schema = self.dataset[passage_idx]["schema"]
         all_properties = []
         self.get_all_examples_recurse(schema, all_properties, prefix = "")
-        for schema in all_properties:
+
+        collapsed_properties = [all_properties[i]["collapsed_property"] for i in range(len(all_properties))]
+        original_properties = [all_properties[i]["original_property"] for i in range(len(all_properties))]
+
+        for properties in all_properties:
+          schema = properties["collapsed_property"]
+          original_property = properties["original_property"]
+
           data.append(generate_prompt(passage, schema))
           schemas.append(schema)
+          original_properties.append(original_property)
+          
       
-      return data, schemas
+      return data, schemas, original_properties
 
   def get_batches(self, generate_prompt):
       batches = []
