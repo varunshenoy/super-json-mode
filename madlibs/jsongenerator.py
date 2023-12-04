@@ -56,7 +56,7 @@ class JSONGenerator:
 
         #dataset generator object from raw JSON file
         batcher = JSONBatcher(self.dataset_file)
-        data, schemas = batcher.get_dataset(self.generate_prompt)
+        data, schemas, original_properties, prompt_ids = batcher.get_dataset(self.generate_prompt)
 
         #Initialize Hugging Face Dataset object
         dataset = JSONDataset(data)
@@ -103,10 +103,13 @@ class JSONGenerator:
 
 
         cleaned_outputs = clean_outputs(outputs)
-        if out:
-          write_outputs('test_output_dir', cleaned_outputs, 2, **sampling_params)
 
-        return outputs, evals
+        if out:
+          write_outputs(self.dataset_file, out_dir, cleaned_outputs, 2, sampling_params)
+        
+        output_jsons = build_json(cleaned_outputs, original_properties, prompt_ids)
+
+        return output_jsons, evals
 
     def print(self, evals, show_generation=False):
         table = PrettyTable()

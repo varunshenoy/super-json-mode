@@ -1,5 +1,7 @@
 from madlibs import *
+from madlibs.utils.postprocessing import build_json
 
+OUTPUT_FNAME = "/Users/alexderhacobian/Downloads/batch-size=2_max-length=512_jsonbench_outputs (2).txt"
 
 def generate_prompt(passage, schema):
     user_message = f"""{passage}
@@ -10,10 +12,9 @@ def generate_prompt(passage, schema):
     prompt = f"""<s><<SYS>>You only respond in JSON. You do not add text before. You do not add text after. Only JSON. <</SYS>>[INST] {user_message} [/INST]"""
     return prompt
 
-# batcher = JSONBatcher('example-jsons/jsonbench.jsonl')
-# data, schemas, original_properties, prompt_ids = batcher.get_dataset(generate_prompt)
+batcher = JSONBatcher('example-jsons/jsonbench.jsonl')
+data, schemas, original_properties, prompt_ids = batcher.get_dataset(generate_prompt)
 
-with open("/Users/alexderhacobian/Downloads/batch-size=2_max-length=512_jsonbench_outputs (1).txt", "r") as f:
-    for line in f.readlines():
-        print(line)
-#batcher = JSONGenerator('jsonbench.jsonl')
+with open(OUTPUT_FNAME, "r") as f:
+    cleaned_outputs = f.readlines()
+    build_json(cleaned_outputs, original_properties, prompt_ids)
