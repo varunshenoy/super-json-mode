@@ -1,0 +1,27 @@
+{
+  "company": {
+    "name": "string",
+    "location": {
+      "city" : "string", 
+      "country" : "string"
+    }
+  },
+  "product": {
+    "name": "string",
+    "release_date": {
+      "month" : "string", 
+      "date" : "number", 
+      "year" : "number"
+    }
+  },
+  "event": {
+    "type": "string",
+    "attendance": "number"
+  },
+  "CEO": {
+    "name": "string"
+  },
+  "price": {
+    "base_model": "number"
+  }
+}
