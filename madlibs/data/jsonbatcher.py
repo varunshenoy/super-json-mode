@@ -6,11 +6,13 @@ from prettytable import PrettyTable
 from itertools import islice 
 import numpy as np
 import copy
+from .jsondataset import *
 
 
 class JSONBatcher:
-  def __init__(self, dataset_file, batch_size = 4):
+  def __init__(self, dataset_file, generate_prompt, batch_size = 4):
     self.dataset = self.load_dataset(dataset_file)
+    self.generate_prompt = generate_prompt
     self.batch_size = batch_size
 
   def load_dataset(self, dataset_file):
@@ -60,7 +62,7 @@ class JSONBatcher:
 
     return levelwise_batches
   
-  def get_dataset(self, generate_prompt):
+  def get_data(self):
       data = []
       schemas = []
       original_properties = []
@@ -77,12 +79,22 @@ class JSONBatcher:
           original_property = properties["original_property"]
           prompt_id = properties["prompt_id"]
 
-          data.append(generate_prompt(passage, schema))
+          data.append(self.generate_prompt(passage, schema))
           schemas.append(schema)
           original_properties.append(original_property)
           prompt_ids.append(prompt_id)
           
-      return data, schemas, original_properties, prompt_ids
+      self.data = data
+      self.schemas = schemas
+      self.original_properties = original_properties
+      self.prompt_ids = prompt_ids
+
+      return 
+    
+  def get_dataset(self):
+     self.get_data()
+     return JSONDataset(self.data) 
+
 
   def get_batches(self, generate_prompt):
       batches = []

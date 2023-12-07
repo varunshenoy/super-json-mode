@@ -2,9 +2,24 @@ import os
 import numpy as np
 import json
 
-def clean_outputs(outputs):
 
-  generated_texts = [outputs[i][0]["generated_text"] for i in range(len(outputs))]
+class PostProcessor:
+  def __init__(self, 
+               outputs,
+               batcher,
+               out, 
+               out_dir,
+               **sampling_params):
+
+    self.outputs = outputs
+    self.batcher = batcher
+    self.out = out
+    self.out_dir = out_dir
+    self.sampling_params = sampling_params
+
+def clean_outputs(self):
+
+  generated_texts = [self.outputs[i][0]["generated_text"] for i in range(len(self.outputs))]
 
   clean_generated_texts = []
 
@@ -21,27 +36,27 @@ def clean_outputs(outputs):
   
   return clean_generated_texts
 
-def write_outputs(dataset_file, output_dir, outputs, batch_size, sampling_params):
+def write_outputs(self):
 
-  if not os.path.isdir(output_dir):
-    os.mkdir(output_dir)
+  if not os.path.isdir(self.out_dir):
+    os.mkdir(self.out_dir)
 
-  outfile = dataset_file.split(".")[0] + '.txt'
-  outfile_global = os.path.join(output_dir, outfile)
+  outfile = 'PLACEHOLDER.txt' #TODO FIX
+  outfile_global = os.path.join(self.out_dir, outfile)
 
   with open(outfile_global, "a") as f:
-    f.writelines([outputs[i] + "\n" for i in range(len(outputs))])
+    f.writelines([self.outputs[i] + "\n" for i in range(len(self.outputs))])
     f.close()
 
-def build_json(outputs, original_properties, prompt_ids):
-  unique_prompt_ids = set(prompt_ids)
+def build_json(self):
+  unique_prompt_ids = set(self.batcher.prompt_ids)
   output_jsons = []
 
   for prompt_id in unique_prompt_ids:
     output_json = {}
-    promptwise_filter = np.equal(prompt_ids, prompt_id)
-    promptwise_outputs = np.array(outputs)[promptwise_filter]
-    promptwise_properties = np.array(original_properties)[promptwise_filter]
+    promptwise_filter = np.equal(self.batcher.prompt_ids, prompt_id)
+    promptwise_outputs = np.array(self.outputs)[promptwise_filter]
+    promptwise_properties = np.array(self.batcher.original_properties)[promptwise_filter]
 
     for i in range(len(promptwise_outputs)):
       current_level = {}
@@ -63,7 +78,18 @@ def build_json(outputs, original_properties, prompt_ids):
           current_level = {level : current_level}
 
     #print(json.dumps(output_json, indent=4))
+    #TODO ADD JSON DUMP TO WRITE TO SOME OUTPUT .json FILE
     output_jsons.append(output_json)
   
   return output_jsons
-  
+
+def run(self):
+
+    cleaned_outputs = self.clean_outputs(self.outputs)
+
+    if self.out:
+      self.write_outputs()
+    
+    output_jsons = self.build_json()
+
+    return output_jsons
