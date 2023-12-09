@@ -7,7 +7,14 @@ DEFAULT_PROMPT = """Prompt: {prompt}
 
 Based on the prompt, generate a value for the following key:
 
-{key}: """
+{key} """
+
+
+def array_to_yaml(keys):
+    yaml_string = ""
+    for i, key in enumerate(keys):
+        yaml_string += "\t" * i + key + ":" + "\n"
+    return yaml_string
 
 
 class StructuredOutputForModel:
@@ -28,8 +35,9 @@ class StructuredOutputForModel:
     ):
         """Generate a prompt for a single item in a batch."""
 
+        key = array_to_yaml(batch_item.path)
         return extraction_prompt_template.format(
-            prompt=prompt, key=batch_item.path[-1], type=batch_item.type_
+            prompt=prompt, key=key, type=batch_item.type_
         )
 
     def generate(
@@ -46,6 +54,7 @@ class StructuredOutputForModel:
         schema_batcher = SchemaBatcher(schema, batch_size=batch_size)
         batches = schema_batcher.batches
         output_json = {}
+        filler_tokens = ["</s>", "'", '"']
 
         for batch in batches:
             print("running batch")
@@ -65,7 +74,11 @@ class StructuredOutputForModel:
 
             # 3. generate batch of outputs
             prediction = self.model.generate(
-                **embeds, max_new_tokens=max_new_tokens, do_sample=do_sample, **kwargs
+                **embeds,
+                max_new_tokens=max_new_tokens,
+                do_sample=do_sample,
+                pad_token_id=self.tokenizer.eos_token_id,
+                **kwargs,
             )
 
             # 4. decode batch of outputs
@@ -75,6 +88,8 @@ class StructuredOutputForModel:
 
             # 5. insert outputs into schema
             for item, output in zip(batch.items, outputs):
+                for tok in filler_tokens:
+                    output = output.replace(tok, "")
                 insert_into_path(output_json, item.path, output.strip())
 
             print(output_json)

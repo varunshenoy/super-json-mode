@@ -23,9 +23,8 @@ class SchemaBatcher:
         self,
         schema: Union[BaseModel, Dict[str, Any]],
         batch_size: int,
-        is_pydantic=True,
     ):
-        if is_pydantic:
+        if type(schema) == BaseModel:
             self.schema = convert_schema_from_pydantic(schema)
         else:
             self.schema = schema
