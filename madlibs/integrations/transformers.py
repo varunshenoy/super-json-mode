@@ -9,6 +9,12 @@ Based on the prompt, generate a value for the following key:
 
 {key} """
 
+SINGLE_PASS_PROMPT = """[INST]{prompt}
+
+Based on this excerpt, fill out the following schema:
+{schema}
+[/INST]"""
+
 
 def array_to_yaml(keys):
     yaml_string = ""
@@ -92,6 +98,37 @@ class StructuredOutputForModel:
                     output = output.replace(tok, "")
                 insert_into_path(output_json, item.path, output.strip())
 
-            print(output_json)
+            # print(output_json)
 
         return output_json
+
+    def default_generate(
+        self,
+        prompt: str,
+        extraction_prompt_template: str = SINGLE_PASS_PROMPT,
+        schema: str or BaseModel = None,
+        max_new_tokens: int = 256,
+        do_sample: bool = True,
+        **kwargs,
+    ):
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        print("generating...")
+        prompt = extraction_prompt_template.format(prompt=prompt, schema=schema)
+        embeds = self.tokenizer(prompt, return_tensors="pt").to(device)
+        filler_tokens = ["</s>", "'", '"']
+        prediction = self.model.generate(
+            **embeds,
+            max_new_tokens=max_new_tokens,
+            do_sample=do_sample,
+            pad_token_id=self.tokenizer.eos_token_id,
+            **kwargs,
+        )
+        # print(prediction)
+        output = self.tokenizer.batch_decode(
+            prediction[:, embeds["input_ids"].shape[1] :]
+        )[0]
+        for tok in filler_tokens:
+            output = output.replace(tok, "")
+
+        print(output)
+        return output
