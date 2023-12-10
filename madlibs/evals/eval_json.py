@@ -1,0 +1,134 @@
+import json
+from prettytable import PrettyTable
+import time
+
+
+def load_dataset(dataset_file):
+    with open(dataset_file, "r") as f:
+        dataset = [json.loads(line) for line in f.readlines()]
+    return dataset
+
+
+madlibs_prompt_template = """[INST]{prompt}
+
+Based on this excerpt, extract the correct value for "{key}". The answer is in the excerpt. Just print a short answer and then stop.
+
+{key}: [/INST]"""
+
+default_prompt_template = """[INST]{prompt}
+
+Based on this excerpt, output a JSON blob with the the following schema:
+{schema}
+[/INST]"""
+
+
+class StructuredDatasetEvaluator:
+    def __init__(self, dataset_file):
+        self.dataset = load_dataset(dataset_file)
+
+    def run(self, engine, is_madlibs=True, batch_size=4, **sampling_params):
+        self.outputs = []
+        self.run_times = []
+        self.schemas = []
+        self.batch_size = batch_size
+
+        start_time = time.time()
+
+        for sample in self.dataset:
+            passage = sample["passage"]
+            schema = sample["schema"]
+
+            start_time = time.time()
+            if is_madlibs:
+                output = engine.generate(
+                    passage,
+                    extraction_prompt_template=madlibs_prompt_template,
+                    schema=schema,
+                    batch_size=batch_size,
+                )
+            else:
+                prompt = default_prompt_template.format(prompt=passage, schema=schema)
+                output = engine.generate()
+
+            time_taken = round(time.time() - start_time, 3)
+            self.run_times.append(time_taken)
+            self.outputs.append(output)
+            self.schemas.append(schema)
+
+        return self.outputs, self.run_times
+
+    def has_matching_schema(self, output, target):
+        # Checks if JSON objects have matching schemas
+        if isinstance(output, dict) and isinstance(target, dict):
+            for key in target:
+                if key not in output or not self.has_matching_schema(
+                    output[key], target[key]
+                ):
+                    return False
+            return True
+        return isinstance(output, type(target))
+
+    def print_evals(self, evals):
+        # Prints evaluations in a PrettyTable
+        table = PrettyTable()
+
+        # print(evals)
+
+        table.field_names = [
+            "Valid (✅/❌)",
+            "Matches Schema (✅/❌)",
+            "Batch Size",
+            "Time (s)",
+            "Error",
+        ]
+        for eval in evals:
+            table.add_row(
+                [
+                    eval["is_valid"],
+                    eval["matches_schema"],
+                    eval["batch_size"],
+                    eval["time_taken"],
+                    eval["error_type"],
+                ]
+            )
+
+        print(table)
+
+    def generate_eval(self, output, run_time, schema):
+        # Generates a single evaluation
+        evaluation = {
+            "generation": output,
+            "time_taken": run_time,
+            "batch_size": self.batch_size,
+            "is_valid": False,
+            "matches_schema": False,
+            "error_type": "unknown",
+        }
+
+        try:
+            # Attempt to parse the generation as JSON
+            if isinstance(evaluation["generation"], str):
+                json_result = json.loads(evaluation["generation"])
+            else:
+                json_result = evaluation["generation"]
+            evaluation["is_valid"] = True
+
+            # Check if JSON result matches schema
+            evaluation["matches_schema"] = self.has_matching_schema(json_result, schema)
+            evaluation["error_type"] = (
+                None if evaluation["matches_schema"] else "schema_mismatch"
+            )
+
+        except ValueError:
+            evaluation["error_type"] = "invalid_json"
+
+        return evaluation
+
+    def run_eval(self):
+        evals = []
+
+        for output, run_time, schema in zip(self.outputs, self.run_times, self.schemas):
+            eval = self.generate_eval(output, run_time, schema)
+            evals.append(eval)
+
+        self.print_evals(evals)
