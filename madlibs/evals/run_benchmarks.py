@@ -10,7 +10,7 @@ import sys
 
 from madlibs.integrations.transformers import StructuredOutputForModel
 
-# from madlibs.integrations.vllm import StructuredVLLMModel
+from madlibs.integrations.vllm import StructuredVLLMModel
 from pydantic import BaseModel
 from madlibs.evals.eval_json import StructuredDatasetEvaluator
 
@@ -24,6 +24,7 @@ class BenchmarkRunner:
     def __init__(self, model_id, backend: Backend):
         device = "cuda"
         self.evaluator = None
+        self.backend = backend
         if backend == Backend.TRANSFORMERS:
             model = AutoModelForCausalLM.from_pretrained(model_id).to(device)
             tokenizer = AutoTokenizer.from_pretrained(model_id)
@@ -31,12 +32,17 @@ class BenchmarkRunner:
 
             # Create a structured output object
             self.model_to_benchmark = StructuredOutputForModel(model, tokenizer)
+        elif backend == Backend.VLLM:
+            self.model_to_benchmark = StructuredVLLMModel(model_id)
 
     def run_json_benchmark(
-        self, benchmark_file: str, batch_size=4, **generation_kwargs
+        self, benchmark_file: str, batch_size=4, run_batching=True, **generation_kwargs
     ):
         self.evaluator = StructuredDatasetEvaluator(benchmark_file)
-        out = self.evaluator.run(self.model_to_benchmark, batch_size=batch_size)
+        print(run_batching)
+        out = self.evaluator.run(
+            self.model_to_benchmark, batch_size=batch_size, run_batching=run_batching
+        )
 
     def print_evals(self):
         self.evaluator.run_eval()

@@ -10,6 +10,12 @@ Based on the prompt, generate a value for the following key:
 
 {key}: """
 
+SINGLE_PASS_PROMPT = """[INST]{prompt}
+
+Based on this excerpt, fill out the following schema:
+{schema}
+[/INST]"""
+
 
 class StructuredVLLMModel:
     def __init__(self, model_id):
@@ -59,3 +65,20 @@ class StructuredVLLMModel:
                 insert_into_path(output_json, item.path, output.strip())
 
         return output_json
+
+    def default_generate(
+        self,
+        prompt: str,
+        extraction_prompt_template: str = SINGLE_PASS_PROMPT,
+        schema: str or BaseModel = None,
+        max_new_tokens: int = 256,
+        **kwargs,
+    ):
+        prompt = extraction_prompt_template.format(prompt=prompt, schema=schema)
+
+        sampling_params = SamplingParams(**kwargs)
+        sampling_params.max_tokens = max_new_tokens
+
+        result = self.llm.generate(prompt, sampling_params=sampling_params)[0]
+        output = result.outputs[0].text
+        return output

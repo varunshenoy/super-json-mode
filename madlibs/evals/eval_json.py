@@ -4,7 +4,7 @@ import time
 
 
 def load_dataset(dataset_file):
-    with open(dataset_file, "r") as f:
+    with open(dataset_file, "r", encoding="utf-8") as f:
         dataset = [json.loads(line) for line in f.readlines()]
     return dataset
 
@@ -17,8 +17,12 @@ Based on this excerpt, extract the correct value for "{key}". The answer is in t
 
 default_prompt_template = """[INST]{prompt}
 
-Based on this excerpt, output a JSON blob with the the following schema:
+Based on this excerpt, fill out the following schema in valid JSON:
 {schema}
+
+Do not just copy over the types. Retain the structure of the schema and fill in the appropriate values. Don't provide type values, just provide the actual values.
+
+Use double quotes for the JSON.
 [/INST]"""
 
 
@@ -26,7 +30,7 @@ class StructuredDatasetEvaluator:
     def __init__(self, dataset_file):
         self.dataset = load_dataset(dataset_file)
 
-    def run(self, engine, is_madlibs=True, batch_size=4, **sampling_params):
+    def run(self, engine, run_batching=True, batch_size=4, **sampling_params):
         self.outputs = []
         self.run_times = []
         self.schemas = []
@@ -39,7 +43,7 @@ class StructuredDatasetEvaluator:
             schema = sample["schema"]
 
             start_time = time.time()
-            if is_madlibs:
+            if run_batching:
                 output = engine.generate(
                     passage,
                     extraction_prompt_template=madlibs_prompt_template,
@@ -47,8 +51,11 @@ class StructuredDatasetEvaluator:
                     batch_size=batch_size,
                 )
             else:
-                prompt = default_prompt_template.format(prompt=passage, schema=schema)
-                output = engine.generate()
+                output = engine.default_generate(
+                    passage,
+                    schema=schema,
+                    extraction_prompt_template=default_prompt_template,
+                )
 
             time_taken = round(time.time() - start_time, 3)
             self.run_times.append(time_taken)
