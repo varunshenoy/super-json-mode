@@ -64,6 +64,19 @@ class StructuredDatasetEvaluator:
 
         return self.outputs, self.run_times
 
+    def convert_schema_to_jsonformer_format(self, schema):
+      # Convert to JSONFormer-compatible schema for schema checking
+      jsonformer_schema = {}
+      jsonformer_schema["type"] = "object"
+      jsonformer_schema["properties"] = {}
+      for key in schema.keys():
+        if type(schema[key]) is dict:
+            jsonformer_schema["properties"][key] = self.convert_schema_to_jsonformer_format(schema[key])
+        else:
+          jsonformer_schema["properties"][key] = {"type" : schema[key]}
+
+      return jsonformer_schema
+
     def has_matching_schema(self, output, target):
         # Checks if JSON objects have matching schemas
         if isinstance(output, dict) and isinstance(target, dict):
@@ -121,7 +134,8 @@ class StructuredDatasetEvaluator:
             evaluation["is_valid"] = True
 
             # Check if JSON result matches schema
-            evaluation["matches_schema"] = self.has_matching_schema(json_result, schema)
+            jsonformer_json_result = self.convert_schema_to_jsonformer_format(json_result)
+            evaluation["matches_schema"] = self.has_matching_schema(jsonformer_json_result, schema)
             evaluation["error_type"] = (
                 None if evaluation["matches_schema"] else "schema_mismatch"
             )
@@ -132,10 +146,10 @@ class StructuredDatasetEvaluator:
         return evaluation
 
     def run_eval(self):
-        evals = []
+        self.evals = []
 
         for output, run_time, schema in zip(self.outputs, self.run_times, self.schemas):
             eval = self.generate_eval(output, run_time, schema)
-            evals.append(eval)
+            self.evals.append(eval)
 
-        self.print_evals(evals)
+        self.print_evals(self.evals)
