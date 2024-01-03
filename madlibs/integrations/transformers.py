@@ -52,7 +52,7 @@ class StructuredOutputForModel:
         extraction_prompt_template: str = DEFAULT_PROMPT,
         schema: str or BaseModel = None,
         batch_size: int = 4,
-        max_new_tokens: int = 256,
+        max_new_tokens: int = 20,
         do_sample: bool = True,
         **kwargs,
     ):

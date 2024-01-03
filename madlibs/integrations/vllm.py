@@ -16,6 +16,15 @@ Based on this excerpt, fill out the following schema:
 {schema}
 [/INST]"""
 
+class VLLMConstrainedSamplingProcessor:
+    # def __init__(self, max_new_tokens):
+    #     self.max_new_tokens = max_new_tokens
+
+    def __call__(self, token_ids, logits):
+        # only allow integers and floats
+        
+        
+
 
 class StructuredVLLMModel:
     def __init__(self, model_id):
@@ -39,7 +48,8 @@ class StructuredVLLMModel:
         extraction_prompt_template: str = DEFAULT_PROMPT,
         schema: str or BaseModel = None,
         batch_size: int = 4,
-        max_new_tokens: int = 256,
+        max_new_tokens: int = 20,
+        use_constrained_sampling=True,
         **kwargs,
     ):
         schema_batcher = SchemaBatcher(schema, batch_size=batch_size)
@@ -57,6 +67,8 @@ class StructuredVLLMModel:
 
             sampling_params = SamplingParams(**kwargs)
             sampling_params.max_tokens = max_new_tokens
+            if use_constrained_sampling:
+                sampling_params.logits_processors = []
 
             results = self.llm.generate(prompts, sampling_params=sampling_params)
             outputs = [result.outputs[0].text for result in results]
