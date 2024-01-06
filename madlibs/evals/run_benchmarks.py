@@ -38,10 +38,3 @@ class BenchmarkRunner:
 
     def print_evals(self):
         self.evaluator.run_eval()
-
-
-# run_json_benchmark(
-#     "mistralai/Mistral-7B-Instruct-v0.1",
-#     Backend.TRANSFORMERS,
-#     "../../benchmark/jsonbench.jsonl",
-# )

@@ -4,3 +4,4 @@ pydantic==2.5.2
 torch==2.1.0
 tqdm==4.65.0
 vllm
+transformers

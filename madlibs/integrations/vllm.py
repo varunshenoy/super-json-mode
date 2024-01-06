@@ -1,29 +1,9 @@
+from typing import Dict, List, Optional
 import vllm
 from vllm import SamplingParams
 from madlibs.data.parser import SchemaBatcher, SchemaItem, insert_into_path
+from madlibs.data.prompts import DEFAULT_PROMPT, SINGLE_PASS_PROMPT
 from pydantic import BaseModel
-
-
-DEFAULT_PROMPT = """Prompt: {prompt}
-
-Based on the prompt, generate a value for the following key:
-
-{key}: """
-
-SINGLE_PASS_PROMPT = """[INST]{prompt}
-
-Based on this excerpt, fill out the following schema:
-{schema}
-[/INST]"""
-
-class VLLMConstrainedSamplingProcessor:
-    # def __init__(self, max_new_tokens):
-    #     self.max_new_tokens = max_new_tokens
-
-    def __call__(self, token_ids, logits):
-        # only allow integers and floats
-        
-        
 
 
 class StructuredVLLMModel:
@@ -48,11 +28,13 @@ class StructuredVLLMModel:
         extraction_prompt_template: str = DEFAULT_PROMPT,
         schema: str or BaseModel = None,
         batch_size: int = 4,
+        # max_new_tokens needs to be large enough to fit the largest value in the schema
         max_new_tokens: int = 20,
         use_constrained_sampling=True,
+        dag: Optional[Dict[str, List[str]]] = None,
         **kwargs,
     ):
-        schema_batcher = SchemaBatcher(schema, batch_size=batch_size)
+        schema_batcher = SchemaBatcher(schema, dag=dag, batch_size=batch_size)
         batches = schema_batcher.batches
 
         output_json = {}
@@ -68,6 +50,7 @@ class StructuredVLLMModel:
             sampling_params = SamplingParams(**kwargs)
             sampling_params.max_tokens = max_new_tokens
             if use_constrained_sampling:
+                # TODO: implement constrained sampling on the logits
                 sampling_params.logits_processors = []
 
             results = self.llm.generate(prompts, sampling_params=sampling_params)
@@ -83,6 +66,7 @@ class StructuredVLLMModel:
         prompt: str,
         extraction_prompt_template: str = SINGLE_PASS_PROMPT,
         schema: str or BaseModel = None,
+        # max_new_tokens needs to be large enough to fit the filled-in schema
         max_new_tokens: int = 256,
         **kwargs,
     ):
