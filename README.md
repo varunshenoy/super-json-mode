@@ -6,6 +6,8 @@ Varun Shenoy & Alex Derhacobian
 
 **Madlibs** is a Python framework that enables the efficient creation of structured output from an LLM by breaking up a target schema into atomic components and then performing generations in parallel.
 
+Compared to a naive JSON generation pipeline relying on prompting and HF Transformers, we find Madlibs can generate outputs as much as **30x faster** on a custom dataset we curated.
+
 ## How does it work?
 
 Structured output formats, such as JSON or YAML, have an inherent parallel or hierarchichal structure.
@@ -38,7 +40,15 @@ If we want to extract `address`, `square footage`, `number of bedrooms`, `number
 
 This is how most teams currently extract structured output from unstructured text using LLMs.
 
-However, this is inefficient. Notice how each of these keys are independent of one another. Madlibs takes advantage of "prompt parallelism" by treating every key-value pair in the schema as a separate inquiry. LLMs are embarrasingly parallel and running queries in batches is much faster than in a serial order. Therefore, we can split up the schema over multiple queries. The LLM will then fill in the schema for each independent key **in parallel** and emit far fewer tokens in a single pass, allowing for much faster inference times.
+However, this is inefficient.
+
+Notice how each of these keys are independent of one another. Madlibs takes advantage of **prompt parallelism** by treating every key-value pair in the schema as a separate inquiry.
+
+For example, we can extract the `num_baths` without having already generated the `address`!
+
+Moreover, LLMs are embarrasingly parallel and running queries in batches is much faster than in a serial order.
+
+Thus, we can split up the schema over multiple queries. The LLM will then fill in the schema for each independent key **in parallel** and emit far fewer tokens in a single pass, allowing for much faster inference times.
 
 ## Installation
 
