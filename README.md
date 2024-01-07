@@ -1,12 +1,12 @@
 # Madlibs: A Framework for Accelerated Structured Output Generation
 
-Varun Shenoy & Alex Derhacobian
-
 ![A diagram](figs/diagram.png)
 
 **Madlibs** is a Python framework that enables the efficient creation of structured output from an LLM by breaking up a target schema into atomic components and then performing generations in parallel.
 
 Compared to a naive JSON generation pipeline relying on prompting and HF Transformers, we find Madlibs can generate outputs as much as **30x faster** on a custom dataset we curated.
+
+Built by Varun Shenoy & Alex Derhacobian
 
 ## How does it work?
 
@@ -20,11 +20,31 @@ Consider the following unstructured passage:
 
 > The grand entrance leads you to a spacious living area, providing an excellent ambience for gatherings or a quiet evening by the fire. The chef's kitchen includes state-of-the-art appliances, custom cabinetry, and beautiful granite countertops making it a dream for anyone who loves to cook.
 
-> Enjoy the beauty of San Francisco through large windows that provide not only an abundance of sunlight but spectacular city views. This gem also includes a beautifully landscaped patio, perfect for outdoor family gatherings or silent reflection in the lap of nature.
-
-> Located in one of San Francisco’s most coveted neighborhoods, 123 Azure Lane seamlessly marries gorgeous architecture with modern comforts, making it indeed a dream dwelling worth investing in. Don't miss the chance to make this house your forever home.
-
 If we want to extract `address`, `square footage`, `number of bedrooms`, `number of bathrooms`, and `price` using an LLM, we could ask the model to fill in a schema according to the description.
+
+A potential schema (such as one generated from a Pydantic object) could look like this:
+
+```
+{
+    "address": {
+        "type": "string"
+    },
+    "price": {
+        "type": "number"
+    },
+    "square_feet": {
+        "type": "integer"
+    },
+    "num_beds": {
+        "type": "integer"
+    },
+    "num_baths": {
+        "type": "integer"
+    }
+}
+```
+
+And a valid output could look something like this:
 
 ```
 {
@@ -36,7 +56,7 @@ If we want to extract `address`, `square footage`, `number of bedrooms`, `number
 }
 ```
 
-This is how most teams currently extract structured output from unstructured text using LLMs.
+This is currently how most teams currently extract structured output from unstructured text using LLMs.
 
 However, this is inefficient.
 
