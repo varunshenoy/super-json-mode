@@ -14,17 +14,15 @@ Structured output formats, such as JSON or YAML, have an inherent parallel or hi
 
 Consider the following unstructured passage:
 
-```
-Welcome to 123 Azure Lane, a stunning San Francisco residence boasting fantastic contemporary design, now on the market for $2,500,000. Spread out over a luxurious 3,000 square feet, this property combines sophistication and comfort to create a truly unique living experience.
+> Welcome to 123 Azure Lane, a stunning San Francisco residence boasting fantastic contemporary design, now on the market for $2,500,000. Spread out over a luxurious 3,000 square feet, this property combines sophistication and comfort to create a truly unique living experience.
 
-An idyllic home for families or professionals, our exclusive residence is equipped with five spacious bedrooms, each oozing warmth and modern elegance. The bedrooms are carefully planned to allow ample natural light and generous storage space. With three elegantly designed full bathrooms, the residence guarantees convenience and privacy for its residents.
+> An idyllic home for families or professionals, our exclusive residence is equipped with five spacious bedrooms, each oozing warmth and modern elegance. The bedrooms are carefully planned to allow ample natural light and generous storage space. With three elegantly designed full bathrooms, the residence guarantees convenience and privacy for its residents.
 
-The grand entrance leads you to a spacious living area, providing an excellent ambience for gatherings or a quiet evening by the fire. The chef's kitchen includes state-of-the-art appliances, custom cabinetry, and beautiful granite countertops making it a dream for anyone who loves to cook.
+> The grand entrance leads you to a spacious living area, providing an excellent ambience for gatherings or a quiet evening by the fire. The chef's kitchen includes state-of-the-art appliances, custom cabinetry, and beautiful granite countertops making it a dream for anyone who loves to cook.
 
-Enjoy the beauty of San Francisco through large windows that provide not only an abundance of sunlight but spectacular city views. This gem also includes a beautifully landscaped patio, perfect for outdoor family gatherings or silent reflection in the lap of nature.
+> Enjoy the beauty of San Francisco through large windows that provide not only an abundance of sunlight but spectacular city views. This gem also includes a beautifully landscaped patio, perfect for outdoor family gatherings or silent reflection in the lap of nature.
 
-Located in one of San Francisco’s most coveted neighborhoods, 123 Azure Lane seamlessly marries gorgeous architecture with modern comforts, making it indeed a dream dwelling worth investing in. Don't miss the chance to make this house your forever home.
-```
+> Located in one of San Francisco’s most coveted neighborhoods, 123 Azure Lane seamlessly marries gorgeous architecture with modern comforts, making it indeed a dream dwelling worth investing in. Don't miss the chance to make this house your forever home.
 
 If we want to extract `address`, `square footage`, `number of bedrooms`, `number of bathrooms`, and `price` using an LLM, we could ask the model to fill in a schema according to the description.
 
