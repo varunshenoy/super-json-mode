@@ -70,8 +70,36 @@ Thus, we can split up the schema over multiple queries. The LLM will then fill i
 
 ## Installation
 
+1. Create a conda environment and install the dependencies
+
+```
+conda create --name madlibs python=3.10 -y
+conda activate madlibs
+```
+
+2. Clone and install the dependencies
+
+```
+git clone https://github.com/varunshenoy/madlibs
+cd madlibs
+pip install -r requirements.txt
+```
+
 ## Examples
 
-## Testing
+...
 
 ## Citation
+
+We appreciate it if you would please cite the following paper if you found the library useful for your work:
+
+```
+@article{madlibs2024,
+  title={Madlibs: A Framework for Accelerated Structured Output Generation},
+  author={Shenoy, Varun and Derhacobian, Alex},
+  journal={arXiv},
+  year={2024}
+}
+```
+
+_This project was built for CS 229: Systems for Machine Learning. Huge thanks to the teaching team and TAs for their guidance throughout this project._
