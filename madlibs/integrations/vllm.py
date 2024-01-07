@@ -31,10 +31,9 @@ class StructuredVLLMModel:
         # max_new_tokens needs to be large enough to fit the largest value in the schema
         max_new_tokens: int = 20,
         use_constrained_sampling=True,
-        dag: Optional[Dict[str, List[str]]] = None,
         **kwargs,
     ):
-        schema_batcher = SchemaBatcher(schema, dag=dag, batch_size=batch_size)
+        schema_batcher = SchemaBatcher(schema, batch_size=batch_size)
         batches = schema_batcher.batches
 
         output_json = {}

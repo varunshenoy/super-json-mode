@@ -112,7 +112,6 @@ class StructuredOutputForModel:
         **kwargs,
     ):
         device = "cuda" if torch.cuda.is_available() else "cpu"
-        print("generating...")
         prompt = extraction_prompt_template.format(prompt=prompt, schema=schema)
         embeds = self.tokenizer(prompt, return_tensors="pt").to(device)
         filler_tokens = ["</s>", "'", '"']
