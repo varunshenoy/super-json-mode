@@ -89,6 +89,16 @@ pip install -r requirements.txt
 
 ...
 
+## Roadmap
+
+There's a lot of features that can make Madlibs better, but we're just two guys with a limited amount of time. Would love any help!
+
+-[ ] Structured sampling: ideally, we should mask the LLM's logits to enforce type constraints, similar to JSONFormer. There are a few packages out there that already do this, and either those should integrate our parallelized JSON generation pipeline or we should build it out into Madlibs.
+
+-[ ] Llama.cpp Support: Madlibs works best in local situations where batch size is generally 1. You can exploit batchingto reduce latency, similar to speculative decoding. Llama.cpp is the premier framework for local models + cpu inference.
+
+-[ ] TRT-LLM Support: vLLM is great and easy to use, but ideally we integrate with a much more performant framework like TRT-LLM.
+
 ## Citation
 
 We appreciate it if you would please cite the following paper if you found the library useful for your work:
@@ -99,6 +109,14 @@ We appreciate it if you would please cite the following paper if you found the l
   author={Shenoy, Varun and Derhacobian, Alex},
   journal={arXiv},
   year={2024}
+}
+@misc{ShenoyDerhacobian2024,
+  author = {Shenoy, Varun and Derhacobian, Alex},
+  title = {Madlibs: A Framework for Accelerated Structured Output Generation},
+  year = {2024},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/varunshenoy/madlibs}}
 }
 ```
 
