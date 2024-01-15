@@ -6,6 +6,8 @@
 
 Compared to a naive JSON generation pipeline relying on prompting and HF Transformers, we find Super JSON Mode can generate outputs as much as **30x faster** on a custom dataset we curated.
 
+![madlibs vs. the world](figs/dolly_bench.png)
+
 We don't expect people to use Madlibs in production, but we hope it can serve as a useful tool for researchers and engineers to prototype structured output generation pipelines.
 
 ## How does it work?
