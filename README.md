@@ -72,7 +72,7 @@ Thus, we can split up the schema over multiple queries. The LLM will then fill i
 
 ## Installation
 
-1. Create a conda environment and install the dependencies
+1. Create a conda environment
 
 ```
 conda create --name madlibs python=3.10 -y
