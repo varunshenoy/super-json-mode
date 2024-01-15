@@ -89,7 +89,7 @@ pip install -r requirements.txt
 
 ## Examples
 
-We've tried to make Madlibs super easy to use. See the `examples` folder for more examples.
+We've tried to make Madlibs super easy to use. See the `examples` folder for more examples and `vLLM` usage.
 
 Using HuggingFace Transformers:
 
