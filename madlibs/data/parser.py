@@ -38,6 +38,8 @@ class SchemaBatcher:
         self, schema: Dict[str, Any], path: List[Union[str, int]] = []
     ) -> Generator[SchemaItem, None, None]:
         """Generator function yielding schema items, handling 'object' and 'array' types."""
+
+        # TODO: attach metadata to schema items if needed
         if schema["type"] == "object":
             for k, v in schema["properties"].items():
                 yield from self.processing_items(v, path + [k])

@@ -1,29 +1,12 @@
 from transformers import PreTrainedModel, PreTrainedTokenizerBase
 import torch
 from madlibs.data.parser import SchemaBatcher, SchemaItem, insert_into_path
+from madlibs.integrations.base_integration import BaseIntegration
+from madlibs.data.prompts import DEFAULT_PROMPT, SINGLE_PASS_PROMPT
 from pydantic import BaseModel
 
-DEFAULT_PROMPT = """Prompt: {prompt}
 
-Based on the prompt, generate a value for the following key:
-
-{key} """
-
-SINGLE_PASS_PROMPT = """[INST]{prompt}
-
-Based on this excerpt, fill out the following schema:
-{schema}
-[/INST]"""
-
-
-def array_to_yaml(keys):
-    yaml_string = ""
-    for i, key in enumerate(keys):
-        yaml_string += "\t" * i + key + ":" + "\n"
-    return yaml_string
-
-
-class StructuredOutputForModel:
+class StructuredOutputForModel(BaseIntegration):
     def __init__(self, model: PreTrainedModel, tokenizer: PreTrainedTokenizerBase):
         self.model = model
         self.tokenizer = tokenizer
@@ -32,19 +15,6 @@ class StructuredOutputForModel:
         # This method will be called if the attribute/method "name" is not found
         # in this object, in which case we try to access the attribute from the model.
         return getattr(self.model, name)
-
-    def generate_prompt(
-        self,
-        prompt: str,
-        batch_item: SchemaItem,
-        extraction_prompt_template: str = DEFAULT_PROMPT,
-    ):
-        """Generate a prompt for a single item in a batch."""
-
-        key = array_to_yaml(batch_item.path)
-        return extraction_prompt_template.format(
-            prompt=prompt, key=key, type=batch_item.type_
-        )
 
     def generate(
         self,
@@ -57,13 +27,11 @@ class StructuredOutputForModel:
         **kwargs,
     ):
         device = "cuda" if torch.cuda.is_available() else "cpu"
-        schema_batcher = SchemaBatcher(schema, batch_size=batch_size)
-        batches = schema_batcher.batches
+        batches = self.generate_batches(schema, batch_size=batch_size)
         output_json = {}
         filler_tokens = ["</s>", "'", '"']
 
         for batch in batches:
-            print("running batch")
             # 1. create batch of prompts
             prompts = [
                 self.generate_prompt(
@@ -122,7 +90,7 @@ class StructuredOutputForModel:
             pad_token_id=self.tokenizer.eos_token_id,
             **kwargs,
         )
-        # print(prediction)
+
         output = self.tokenizer.batch_decode(
             prediction[:, embeds["input_ids"].shape[1] :]
         )[0]

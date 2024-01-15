@@ -1,26 +1,16 @@
-from typing import Dict, List, Optional
 import vllm
 from vllm import SamplingParams
-from madlibs.data.parser import SchemaBatcher, SchemaItem, insert_into_path
+from madlibs.data.parser import insert_into_path
 from madlibs.data.prompts import DEFAULT_PROMPT, SINGLE_PASS_PROMPT
+from madlibs.integrations.base_integration import BaseIntegration
 from pydantic import BaseModel
 
+from typing import Any, List, Dict, Optional
 
-class StructuredVLLMModel:
+
+class StructuredVLLMModel(BaseIntegration):
     def __init__(self, model_id):
         self.llm = vllm.LLM(model=model_id)
-
-    def generate_prompt(
-        self,
-        prompt: str,
-        batch_item: SchemaItem,
-        extraction_prompt_template: str = DEFAULT_PROMPT,
-    ):
-        """Generate a prompt for a single item in a batch."""
-
-        return extraction_prompt_template.format(
-            prompt=prompt, key=batch_item.path[-1], type=batch_item.type_
-        )
 
     def generate(
         self,
@@ -32,9 +22,8 @@ class StructuredVLLMModel:
         max_new_tokens: int = 20,
         use_constrained_sampling=True,
         **kwargs,
-    ):
-        schema_batcher = SchemaBatcher(schema, batch_size=batch_size)
-        batches = schema_batcher.batches
+    ) -> Dict[str, Any]:
+        batches = self.generate_batches(schema, batch_size=batch_size)
 
         output_json = {}
 
@@ -68,7 +57,7 @@ class StructuredVLLMModel:
         # max_new_tokens needs to be large enough to fit the filled-in schema
         max_new_tokens: int = 256,
         **kwargs,
-    ):
+    ) -> str:
         prompt = extraction_prompt_template.format(prompt=prompt, schema=schema)
 
         sampling_params = SamplingParams(**kwargs)

@@ -10,6 +10,3 @@ SINGLE_PASS_PROMPT = """[INST]{prompt}
 Based on this excerpt, fill out the following schema:
 {schema}
 [/INST]"""
-
-
-# Prompts for benchmarking and evaluation
