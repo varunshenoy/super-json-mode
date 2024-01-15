@@ -1,17 +1,9 @@
-import json
-import time
-from tqdm import tqdm
-from prettytable import PrettyTable
-import numpy as np
 from enum import Enum
 
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, AutoModelForCausalLM
-import sys
+from transformers import AutoTokenizer, AutoModelForCausalLM
 
 from madlibs.integrations.transformers import StructuredOutputForModel
-
 from madlibs.integrations.vllm import StructuredVLLMModel
-from pydantic import BaseModel
 from madlibs.evals.eval_json import StructuredDatasetEvaluator
 
 
@@ -46,10 +38,3 @@ class BenchmarkRunner:
 
     def print_evals(self):
         self.evaluator.run_eval()
-
-
-# run_json_benchmark(
-#     "mistralai/Mistral-7B-Instruct-v0.1",
-#     Backend.TRANSFORMERS,
-#     "../../benchmark/jsonbench.jsonl",
-# )
