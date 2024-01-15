@@ -19,9 +19,10 @@ class BaseIntegration(ABC):
     ):
         """Generate a prompt for a single item in a batch."""
 
-        key = array_to_yaml(batch_item.path)
+        path = array_to_yaml(batch_item.path)
+        key = batch_item.path[-1]
         return extraction_prompt_template.format(
-            prompt=prompt, key=key, type=batch_item.type_
+            prompt=prompt, key=key, type=batch_item.type_, path=path
         )
 
     def generate_batches(
