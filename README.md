@@ -157,7 +157,7 @@ There's a lot of features that can make Super JSON Mode better. Here are some id
 
 - [ ] **Dependency graph support**: Super JSON Mode has a very obvious failure case: when a key has a dependency on another key. Consider a JSON blob with two keys, `thought` and `response`. This sort of desired output is common for chain-of-thought with large language models, and it's very clear that the `response` is dependent on the `thought`. We should be able to pass in a graph of dependencies and batch prompts in a way that parent outputs are completed and passed onto child schema items.
 
-- [ ] **Llama.cpp support**: Super JSON Mode works best in local situations where batch size is generally 1. You can exploit batchingto reduce latency, similar to speculative decoding. Llama.cpp is the premier framework for local models + cpu inference.
+- [ ] **Local Model Support**: Super JSON Mode works best in local situations where batch size is generally 1. You can exploit batching to reduce latency, similar to speculative decoding. Llama.cpp is the premier framework for local models + cpu inference. I'd love to implement this using Ollama if possible.
 
 - [ ] **TRT-LLM support**: vLLM is great and easy to use, but ideally we integrate with a much more performant framework like TRT-LLM.
 
