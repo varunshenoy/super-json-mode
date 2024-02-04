@@ -24,10 +24,12 @@ class SchemaBatcher:
         schema: Union[BaseModel, Dict[str, Any]],
         batch_size: int,
     ):
-        if type(schema) == BaseModel:
+        if isinstance(schema, dict):
+            self.schema = schema
+        elif issubclass(schema, BaseModel): 
             self.schema = convert_schema_from_pydantic(schema)
         else:
-            self.schema = schema
+            raise ValueError("Schema is not a Pydantic object or a JSON representation of one.")
 
         self.batch_size = batch_size
 
@@ -37,7 +39,7 @@ class SchemaBatcher:
     def processing_items(
         self, schema: Dict[str, Any], path: List[Union[str, int]] = []
     ) -> Generator[SchemaItem, None, None]:
-        """Generator function yielding schema items, handling 'object' and 'array' types."""
+        """Generator function yielding schema items."""
 
         # TODO: attach metadata to schema items if needed
         if schema["type"] == "object":
@@ -66,3 +68,9 @@ def insert_into_path(root: Dict, path: List[Union[str, int]], value: Any):
         else:
             root = root.setdefault(p, {})
     root[path[-1]] = value
+
+def array_to_yaml(keys):
+    yaml_string = ""
+    for i, key in enumerate(keys):
+        yaml_string += "\t" * i + key + ":" + "\n"
+    return yaml_string

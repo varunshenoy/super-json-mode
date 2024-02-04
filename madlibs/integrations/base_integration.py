@@ -26,12 +26,12 @@ class BaseIntegration(ABC):
         )
 
     def generate_batches(
+        self,
         schema: str or BaseModel,
-        batch_size: int,
-        dependencies: Optional[Dict[str, List[str]]] = None,
+        batch_size: int
     ):
         schema_batcher = SchemaBatcher(
-            schema, batch_size=batch_size, dependencies=dependencies
+            schema, batch_size=batch_size
         )
         batches = schema_batcher.batches
         return batches

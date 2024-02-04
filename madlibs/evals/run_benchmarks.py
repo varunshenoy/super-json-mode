@@ -11,7 +11,6 @@ class Backend(Enum):
     TRANSFORMERS = "transformers"
     VLLM = "vllm"
 
-
 class BenchmarkRunner:
     def __init__(self, model_id, backend: Backend):
         device = "cuda"
