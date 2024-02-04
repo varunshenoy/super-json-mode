@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
 from typing import Any, List, Dict, Optional
-from madlibs.data.parser import (
+from superjsonmode.data.parser import (
     SchemaBatcher,
     SchemaItem,
     insert_into_path,
     array_to_yaml,
 )
-from madlibs.data.prompts import DEFAULT_PROMPT, SINGLE_PASS_PROMPT
+from superjsonmode.data.prompts import DEFAULT_PROMPT, SINGLE_PASS_PROMPT
 from pydantic import BaseModel
 
 
@@ -50,7 +50,7 @@ class BaseIntegration(ABC):
     ) -> Dict[str, Any]:
         """
         Abstract method for generating batched queries. Users implement this method for their specific integration.
-        See `madlibs/integrations/vllm.py` for an example.
+        See `superjsonmode/integrations/vllm.py` for an example.
         """
         pass
 

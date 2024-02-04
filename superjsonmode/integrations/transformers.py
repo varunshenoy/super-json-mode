@@ -1,8 +1,8 @@
 from transformers import PreTrainedModel, PreTrainedTokenizerBase
 import torch
-from madlibs.data.parser import SchemaBatcher, SchemaItem, insert_into_path
-from madlibs.integrations.base_integration import BaseIntegration
-from madlibs.data.prompts import DEFAULT_PROMPT, SINGLE_PASS_PROMPT
+from superjsonmode.data.parser import SchemaBatcher, SchemaItem, insert_into_path
+from superjsonmode.integrations.base_integration import BaseIntegration
+from superjsonmode.data.prompts import DEFAULT_PROMPT, SINGLE_PASS_PROMPT
 from pydantic import BaseModel
 
 

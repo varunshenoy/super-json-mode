@@ -1,14 +1,14 @@
-# Madlibs: A Framework for Accelerated Structured Output Generation
+# Super JSON Mode: A Framework for Accelerated Structured Output Generation
 
 ![A diagram](figs/diagram.png)
 
-**Madlibs** is a Python framework that enables the efficient creation of structured output from an LLM by breaking up a target schema into atomic components and then performing generations in parallel. We call our technique **Super JSON Mode** :)
+**Super JSON Mode** is a Python framework that enables the efficient creation of structured output from an LLM by breaking up a target schema into atomic components and then performing generations in parallel.
 
 Compared to a naive JSON generation pipeline relying on prompting and HF Transformers, we find Super JSON Mode can generate outputs as much as **30x faster** on a custom dataset we curated.
 
-![madlibs vs. the world](figs/dolly_bench.png)
+![super json mode vs. the world](figs/dolly_bench.png)
 
-We don't expect people to use Madlibs in production, but we hope it can serve as a useful tool for researchers and engineers to prototype structured output generation pipelines.
+We don't expect people to use Super JSON Mode in production, but we hope it can serve as a useful tool for researchers and engineers to prototype structured output generation pipelines.
 
 ## How does it work?
 
@@ -62,7 +62,7 @@ This is currently how most teams currently extract structured output from unstru
 
 However, this is inefficient.
 
-Notice how each of these keys are independent of one another. Madlibs takes advantage of **prompt parallelism** by treating every key-value pair in the schema as a separate inquiry.
+Notice how each of these keys are independent of one another. Super JSON Mode takes advantage of **prompt parallelism** by treating every key-value pair in the schema as a separate inquiry.
 
 For example, we can extract the `num_baths` without having already generated the `address`!
 
@@ -72,30 +72,40 @@ Thus, we can split up the schema over multiple queries. The LLM will then fill i
 
 ## Installation
 
+### Via PyPI
+
+Run the following command:
+
+```
+pip install super-json-mode
+```
+
+### Manual
+
 1. Create a conda environment
 
 ```
-conda create --name madlibs python=3.10 -y
-conda activate madlibs
+conda create --name superjsonmode python=3.10 -y
+conda activate superjsonmode
 ```
 
 2. Clone and install the dependencies
 
 ```
-git clone https://github.com/varunshenoy/madlibs
-cd madlibs
+git clone https://github.com/varunshenoy/super-json-mode
+cd superjsonmode
 pip install -r requirements.txt
 ```
 
 ## Examples
 
-We've tried to make Madlibs super easy to use. See the `examples` folder for more examples and `vLLM` usage.
+We've tried to make Super JSON Mode super easy to use. See the `examples` folder for more examples and `vLLM` usage.
 
 Using HuggingFace Transformers:
 
 ```python
 from transformers import AutoTokenizer, AutoModelForCausalLM
-from madlibs.integrations.transformers import StructuredOutputForModel
+from superjsonmode.integrations.transformers import StructuredOutputForModel
 from pydantic import BaseModel
 
 device = "cuda"
@@ -139,15 +149,15 @@ print(json.dumps(output, indent=2))
 
 ## Roadmap
 
-There's a lot of features that can make Madlibs better. Here are some ideas.
+There's a lot of features that can make Super JSON Mode better. Here are some ideas.
 
 - [ ] **Qualitative output analysis**: We ran performance benchmarks, but we should come up with a more rigorous approach to judging the qualitative outputs of Super JSON Mode.
 
-- [ ] **Structured sampling**: ideally, we should mask the LLM's logits to enforce type constraints, similar to JSONFormer. There are a few packages out there that already do this, and either those should integrate our parallelized JSON generation pipeline or we should build it out into Madlibs.
+- [ ] **Structured sampling**: ideally, we should mask the LLM's logits to enforce type constraints, similar to JSONFormer. There are a few packages out there that already do this, and either those should integrate our parallelized JSON generation pipeline or we should build it out into Super JSON Mode.
 
 - [ ] **Dependency graph support**: Super JSON Mode has a very obvious failure case: when a key has a dependency on another key. Consider a JSON blob with two keys, `thought` and `response`. This sort of desired output is common for chain-of-thought with large language models, and it's very clear that the `response` is dependent on the `thought`. We should be able to pass in a graph of dependencies and batch prompts in a way that parent outputs are completed and passed onto child schema items.
 
-- [ ] **Llama.cpp support**: Madlibs works best in local situations where batch size is generally 1. You can exploit batchingto reduce latency, similar to speculative decoding. Llama.cpp is the premier framework for local models + cpu inference.
+- [ ] **Llama.cpp support**: Super JSON Mode works best in local situations where batch size is generally 1. You can exploit batchingto reduce latency, similar to speculative decoding. Llama.cpp is the premier framework for local models + cpu inference.
 
 - [ ] **TRT-LLM support**: vLLM is great and easy to use, but ideally we integrate with a much more performant framework like TRT-LLM.
 
@@ -158,11 +168,11 @@ We appreciate it if you would please cite this repo if you found the library use
 ```
 @misc{ShenoyDerhacobian2024,
   author = {Shenoy, Varun and Derhacobian, Alex},
-  title = {Madlibs: A Framework for Accelerated Structured Output Generation},
+  title = {Super JSON Mode: A Framework for Accelerated Structured Output Generation},
   year = {2024},
   publisher = {GitHub},
   journal = {GitHub repository},
-  howpublished = {\url{https://github.com/varunshenoy/madlibs}}
+  howpublished = {\url{https://github.com/varunshenoy/super-json-mode}}
 }
 ```
 

@@ -9,7 +9,7 @@ def load_dataset(dataset_file):
     return dataset
 
 
-madlibs_prompt_template = """[INST]{prompt}
+superjsonmode_prompt_template = """[INST]{prompt}
 
 Based on this excerpt, extract the correct value for "{key}". The answer is in the excerpt. Just print a short answer and then stop.
 
@@ -46,7 +46,7 @@ class StructuredDatasetEvaluator:
             if run_batching:
                 output = engine.generate(
                     passage,
-                    extraction_prompt_template=madlibs_prompt_template,
+                    extraction_prompt_template=superjsonmode_prompt_template,
                     schema=schema,
                     batch_size=batch_size,
                 )

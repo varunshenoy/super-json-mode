@@ -1,8 +1,8 @@
 import vllm
 from vllm import SamplingParams
-from madlibs.data.parser import insert_into_path
-from madlibs.data.prompts import DEFAULT_PROMPT, SINGLE_PASS_PROMPT
-from madlibs.integrations.base_integration import BaseIntegration
+from superjsonmode.data.parser import insert_into_path
+from superjsonmode.data.prompts import DEFAULT_PROMPT, SINGLE_PASS_PROMPT
+from superjsonmode.integrations.base_integration import BaseIntegration
 from pydantic import BaseModel
 
 from typing import Any, List, Dict, Optional

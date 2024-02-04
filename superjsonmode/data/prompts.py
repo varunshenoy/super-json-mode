@@ -1,4 +1,5 @@
-# Default prompts for the madlibs program
+# Default prompts
+
 DEFAULT_PROMPT = """Prompt: {prompt}
 
 Based on the prompt, generate a value for the following key. The value should be a {type}:

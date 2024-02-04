@@ -2,9 +2,9 @@ from enum import Enum
 
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
-from madlibs.integrations.transformers import StructuredOutputForModel
-from madlibs.integrations.vllm import StructuredVLLMModel
-from madlibs.evals.eval_json import StructuredDatasetEvaluator
+from superjsonmode.integrations.transformers import StructuredOutputForModel
+from superjsonmode.integrations.vllm import StructuredVLLMModel
+from superjsonmode.evals.eval_json import StructuredDatasetEvaluator
 
 
 class Backend(Enum):
