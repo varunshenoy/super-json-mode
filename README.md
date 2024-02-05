@@ -130,7 +130,14 @@ output = structured_model.generate(passage,
                                    batch_size=6)
 
 print(json.dumps(output, indent=2))
-# {'company': 'NVIDIA', 'stock_ticker': 'NVDA', 'date': '11/21/2023', 'reported_revenue': '$18.12 billion', 'dividend': '0.04'}
+
+# {
+#   "company": "NVIDIA",
+#   "stock_ticker": "NVDA",
+#   "date": "11/21/2023",
+#   "reported_revenue": "$18.12 billion",
+#   "dividend": "0.04"
+# }
 ```
 
 Using Mistral 7B with HuggingFace Transformers:
