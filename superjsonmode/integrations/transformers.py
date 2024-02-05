@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 
 class StructuredOutputForModel(BaseIntegration):
-    def __init__(self, model: PreTrainedModel, tokenizer: PreTrainedTokenizerBase):
+    def __init__(self, model, tokenizer):
         self.model = model
         self.tokenizer = tokenizer
 

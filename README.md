@@ -4,11 +4,13 @@
 
 **Super JSON Mode** is a Python framework that enables the efficient creation of structured output from an LLM by breaking up a target schema into atomic components and then performing generations in parallel.
 
+It supports both state of the art LLMs via OpenAI's legacy completions API and open source LLMs such as via Hugging Face Transformers and vLLM. More LLMs will be supported soon!
+
 Compared to a naive JSON generation pipeline relying on prompting and HF Transformers, we find Super JSON Mode can generate outputs as much as **30x faster** on a custom dataset we curated.
 
 ![super json mode vs. the world](figs/dolly_bench.png)
 
-We don't expect people to use Super JSON Mode in production, but we hope it can serve as a useful tool for researchers and engineers to prototype structured output generation pipelines.
+We find Super JSON Mode to be ~5x faster and much more deterministic than naive generation when using OpenAI.
 
 ## How does it work?
 
@@ -101,7 +103,39 @@ pip install -r requirements.txt
 
 We've tried to make Super JSON Mode super easy to use. See the `examples` folder for more examples and `vLLM` usage.
 
-Using HuggingFace Transformers:
+Using OpenAI and `gpt-3-instruct-turbo`:
+
+```python
+from superjsonmode.integrations.openai import StructuredOpenAIModel
+from pydantic import BaseModel
+
+structured_model = StructuredOpenAIModel()
+
+passage = """..."""
+
+class QuarterlyReport(BaseModel):
+    company: str
+    stock_ticker: str
+    date: str
+    reported_revenue: str
+    dividend: str
+
+prompt_template = """{prompt}
+
+Based on this excerpt, extract the correct value for "{key}". Keep it succinct. It should have a type of `{type}`.
+
+{key}: """
+
+output = structured_model.generate(passage,
+                                   extraction_prompt_template=prompt_template,
+                                   schema=QuarterlyReport,
+                                   batch_size=6)
+
+print(json.dumps(output, indent=2))
+# {'company': 'NVIDIA', 'stock_ticker': 'NVDA', 'date': '11/21/2023', 'reported_revenue': '$18.12 billion', 'dividend': '0.04'}
+```
+
+Using Mistral 7B with HuggingFace Transformers:
 
 ```python
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -109,8 +143,8 @@ from superjsonmode.integrations.transformers import StructuredOutputForModel
 from pydantic import BaseModel
 
 device = "cuda"
-model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.1").to(device)
-tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.1")
+model = AutoModelForCausalLM.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2").to(device)
+tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-Instruct-v0.2")
 
 # Create a structured output object
 structured_model = StructuredOutputForModel(model, tokenizer)
