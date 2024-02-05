@@ -60,17 +60,15 @@ And a valid output could look something like this:
 }
 ```
 
-This is currently how most teams currently extract structured output from unstructured text using LLMs.
+The obvious approach is to nest the schema in the prompt and ask the model to fill it in. This is currently how most teams currently extract structured output from unstructured text using LLMs.
 
-However, this is inefficient.
+However, this is inefficient for three reasons.
 
-Notice how each of these keys are independent of one another. Super JSON Mode takes advantage of **prompt parallelism** by treating every key-value pair in the schema as a separate inquiry.
+1. Notice how each of these keys are independent of one another. Super JSON Mode takes advantage of **prompt parallelism** by treating every key-value pair in the schema as a separate inquiry. For example, we can extract the `num_baths` without having already generated the `address`!
 
-For example, we can extract the `num_baths` without having already generated the `address`!
+2. Requesting a model to generate JSON from scratch unnecessarily consumes tokens (and therfore time) on predictable syntax, like braces and keys names, which are already expected in the output. This is a strong prior on the generation that we should be able to use to improve latencies.
 
-Moreover, LLMs are embarrasingly parallel and running queries in batches is much faster than in a serial order.
-
-Thus, we can split up the schema over multiple queries. The LLM will then fill in the schema for each independent key **in parallel** and emit far fewer tokens in a single pass, allowing for much faster inference times.
+3. LLMs are embarrasingly parallel and running queries in batches is much faster than in a serial order. Thus, we can split up the schema over multiple queries. The LLM will then fill in the schema for each independent key **in parallel** and emit far fewer tokens in a single pass, allowing for much faster inference times.
 
 ## Installation
 
