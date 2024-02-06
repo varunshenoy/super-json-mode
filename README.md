@@ -104,17 +104,18 @@ Using OpenAI and `gpt-3-instruct-turbo`:
 ```python
 from superjsonmode.integrations.openai import StructuredOpenAIModel
 from pydantic import BaseModel
+import time
 
 model = StructuredOpenAIModel()
 
 class Character(BaseModel):
     name: str
-    summary: str
     genre: str
     age: int
     race: str
     occupation: str
-
+    best_friend: str
+    home_planet: str
 
 prompt_template = """{prompt}
 
@@ -123,31 +124,30 @@ Please fill in the following information about this character for this key. Keep
 {key}: """
 
 
-prompt = """Luke Skywalker is a famous character. Please fill in the following information about this character."""
-
-import time
+prompt = """Luke Skywalker is a famous character."""
 
 start = time.time()
 output = model.generate(
     prompt,
     extraction_prompt_template=prompt_template,
     schema=Character,
-    batch_size=6,
+    batch_size=7,
     stop=["\n\n"],
     temperature=0,
 )
 
 print(f"Total time: {time.time() - start}")
-# Total Time: 0.505s
+# Total Time: 0.409s
 
 print(output)
 # {
 #     "name": "Luke Skywalker",
-#     "summary": "Luke Skywalker is a powerful Jedi Knight and one of the main protagonists in the Star Wars franchise.",
 #     "genre": "Science fiction",
 #     "age": "23",
 #     "race": "Human",
 #     "occupation": "Jedi Knight",
+#     "best_friend": "Han Solo",
+#     "home_planet": "Tatooine",
 # }
 ```
 
