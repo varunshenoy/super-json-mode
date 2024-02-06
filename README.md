@@ -105,36 +105,49 @@ Using OpenAI and `gpt-3-instruct-turbo`:
 from superjsonmode.integrations.openai import StructuredOpenAIModel
 from pydantic import BaseModel
 
-structured_model = StructuredOpenAIModel()
+model = StructuredOpenAIModel()
 
-passage = """..."""
+class Character(BaseModel):
+    name: str
+    summary: str
+    genre: str
+    age: int
+    race: str
+    occupation: str
 
-class QuarterlyReport(BaseModel):
-    company: str
-    stock_ticker: str
-    date: str
-    reported_revenue: str
-    dividend: str
 
 prompt_template = """{prompt}
 
-Based on this excerpt, extract the correct value for "{key}". Keep it succinct. It should have a type of `{type}`.
+Please fill in the following information about this character for this key. Keep it succinct. It should be a {type}.
 
 {key}: """
 
-output = structured_model.generate(passage,
-                                   extraction_prompt_template=prompt_template,
-                                   schema=QuarterlyReport,
-                                   batch_size=6)
 
-print(json.dumps(output, indent=2))
+prompt = """Luke Skywalker is a famous character. Please fill in the following information about this character."""
 
+import time
+
+start = time.time()
+output = model.generate(
+    prompt,
+    extraction_prompt_template=prompt_template,
+    schema=Character,
+    batch_size=6,
+    stop=["\n\n"],
+    temperature=0,
+)
+
+print(f"Total time: {time.time() - start}")
+# Total Time: 0.505s
+
+print(output)
 # {
-#   "company": "NVIDIA",
-#   "stock_ticker": "NVDA",
-#   "date": "11/21/2023",
-#   "reported_revenue": "$18.12 billion",
-#   "dividend": "0.04"
+#     "name": "Luke Skywalker",
+#     "summary": "Luke Skywalker is a powerful Jedi Knight and one of the main protagonists in the Star Wars franchise.",
+#     "genre": "Science fiction",
+#     "age": "23",
+#     "race": "Human",
+#     "occupation": "Jedi Knight",
 # }
 ```
 
