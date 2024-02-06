@@ -4,13 +4,11 @@
 
 **Super JSON Mode** is a Python framework that enables the efficient creation of structured output from an LLM by breaking up a target schema into atomic components and then performing generations in parallel.
 
-It supports both state of the art LLMs via OpenAI's legacy completions API and open source LLMs such as via Hugging Face Transformers and vLLM. More LLMs will be supported soon!
+It supports both state of the art LLMs via **OpenAI**'s legacy completions API and open source LLMs such as via **Hugging Face Transformers** and **vLLM**. More LLMs will be supported soon!
 
-Compared to a naive JSON generation pipeline relying on prompting and HF Transformers, we find Super JSON Mode can generate outputs as much as **30x faster** on a custom dataset we curated.
+Compared to a naive JSON generation pipeline relying on prompting and HF Transformers, we find Super JSON Mode can generate outputs as much as **10x faster**. It's also more deterministic and less likely to run into parsing issues when compared to naive generation.
 
-![super json mode vs. the world](figs/dolly_bench.png)
-
-We find Super JSON Mode to be ~5x faster and much more deterministic than naive generation when using OpenAI.
+Installation is simple: `pip install super-json-mode`
 
 ## How does it work?
 

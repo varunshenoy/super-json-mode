@@ -30,6 +30,7 @@ class StructuredOpenAIModel(BaseIntegration):
         batch_size: int = 4,
         # max_new_tokens needs to be large enough to fit the largest value in the schema
         max_new_tokens: int = 20,
+        stop: list[str] = ["\n"],
         **kwargs,
     ) -> Dict[str, Any]:
         batches = self.generate_batches(schema, batch_size=batch_size)
@@ -48,7 +49,7 @@ class StructuredOpenAIModel(BaseIntegration):
                 model=self.model,
                 prompt=prompts,
                 max_tokens=max_new_tokens,
-                stop=["\n"],
+                stop=stop,
                 **kwargs,
             )
             outputs = [result.text for result in results.choices]
