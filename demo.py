@@ -4,13 +4,19 @@ from pydantic import BaseModel
 import time
 import json
 
+
 class color:
-   CYAN = '\033[96m'
-   BOLD = '\033[1m'
-   END = '\033[0m'
+    CYAN = "\033[96m"
+    BOLD = "\033[1m"
+    END = "\033[0m"
 
 
-print("\n" + color.BOLD + "Generating JSON naively with OpenAI gpt-3.5-turbo..." + color.END)
+print(
+    "\n"
+    + color.BOLD
+    + "Generating JSON naively with OpenAI gpt-3.5-turbo..."
+    + color.END
+)
 print("-------------------------------------------")
 
 prompt = """Luke Skywalker is a famous character."""
@@ -27,20 +33,26 @@ print(default_prompt)
 client = OpenAI()
 
 completion = client.chat.completions.create(
-  model="gpt-3.5-turbo",
-  messages=[
-    {"role": "user", "content": default_prompt}
-  ]
+    model="gpt-3.5-turbo", messages=[{"role": "user", "content": default_prompt}]
 )
 
-print("Total time: " + color.CYAN + color.BOLD + f"{time.time() - start}" + color.END)
+print(
+    "Total time: "
+    + color.CYAN
+    + color.BOLD
+    + f"{time.time() - start} seconds"
+    + color.END
+)
 print("-------------------------------------------")
 print(completion.choices[0].message.content)
 print("-------------------------------------------\n")
 
-print("\n" + color.BOLD + "Testing same OpenAI model with Super JSON Mode..." + color.END)
+print(
+    "\n" + color.BOLD + "Testing same OpenAI model with Super JSON Mode..." + color.END
+)
 print("-------------------------------------------")
 model = StructuredOpenAIModel()
+
 
 class Character(BaseModel):
     name: str
@@ -50,6 +62,7 @@ class Character(BaseModel):
     occupation: str
     best_friend: str
     home_planet: str
+
 
 prompt_template = """{prompt}
 
@@ -63,10 +76,16 @@ output = model.generate(
     extraction_prompt_template=prompt_template,
     schema=Character,
     batch_size=7,
-    # stop=["\n\n"],
+    stop=["\n\n"],
     temperature=0,
 )
-print("Total time: " + color.CYAN + color.BOLD + f"{time.time() - start}" + color.END)
+print(
+    "Total time: "
+    + color.CYAN
+    + color.BOLD
+    + f"{time.time() - start} seconds"
+    + color.END
+)
 print("-------------------------------------------")
 # Total Time: 0.409s
 
@@ -81,5 +100,3 @@ print(json.dumps(output, indent=2))
 #     "home_planet": "Tatooine",
 # }
 print("-------------------------------------------")
-
-

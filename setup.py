@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="super-json-mode",
-    version="0.1.1",
+    version="0.1.2",
     author="Varun Shenoy",
     author_email="vnshenoy@stanford.edu",
     description="A framework for faster structured output generation using LLMs.",
