@@ -10,9 +10,9 @@ from typing import Any, List, Dict, Optional
 
 
 class StructuredOpenAIModel(BaseIntegration):
-    def __init__(self, api_key=None, model="gpt-3.5-turbo-instruct"):
+    def __init__(self, api_key=None, model="gpt-3.5-turbo-instruct", **client_kwargs):
         if api_key:
-            self.client = OpenAI(api_key=api_key)
+            self.client = OpenAI(api_key=api_key, **client_kwargs)
         else:
             if "OPENAI_API_KEY" in os.environ:
                 self.client = OpenAI()
