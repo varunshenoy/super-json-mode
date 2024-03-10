@@ -17,5 +17,7 @@ setup(
         # "vllm==0.3.0",
         "transformers==4.37.2",
         "openai==1.11.1",
+        "sglang[all]",
+        "datasets",
     ],
 )

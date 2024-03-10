@@ -19,12 +19,6 @@ def convert_schema_from_pydantic(schema: BaseModel, root_schema=None):
     schema.pop("title", None)  # remove title keys
     schema.pop("required", None)  # remove title keys
 
-    if schema.get("type") in {
-        "integer",
-        "float",
-    }:  # convert integer/float types to number
-        schema["type"] = "number"
-
     if "properties" in schema:
         for key, prop in schema["properties"].items():
             schema["properties"][key] = convert_schema_from_pydantic(prop, root_schema)

@@ -8,6 +8,7 @@ class SchemaItem(BaseModel):
 
     path: List[Union[str, int]]
     type_: str
+    pattern: Any
     generated_value: Optional[Any] = None
     metadata: Optional[Dict[str, Any]] = None
 
@@ -26,10 +27,12 @@ class SchemaBatcher:
     ):
         if isinstance(schema, dict):
             self.schema = schema
-        elif issubclass(schema, BaseModel): 
+        elif issubclass(schema, BaseModel):
             self.schema = convert_schema_from_pydantic(schema)
         else:
-            raise ValueError("Schema is not a Pydantic object or a JSON representation of one.")
+            raise ValueError(
+                "Schema is not a Pydantic object or a JSON representation of one."
+            )
 
         self.batch_size = batch_size
 
@@ -46,7 +49,8 @@ class SchemaBatcher:
             for k, v in schema["properties"].items():
                 yield from self.processing_items(v, path + [k])
         else:
-            yield SchemaItem(path=path, type_=schema["type"])
+            pattern = schema["pattern"] if "pattern" in schema else None
+            yield SchemaItem(path=path, type_=schema["type"], pattern=pattern)
 
     def create_batches(self, items: List[SchemaItem], batch_size: int):
         """Create batches from given schema items."""
@@ -68,6 +72,7 @@ def insert_into_path(root: Dict, path: List[Union[str, int]], value: Any):
         else:
             root = root.setdefault(p, {})
     root[path[-1]] = value
+
 
 def array_to_yaml(keys):
     yaml_string = ""
