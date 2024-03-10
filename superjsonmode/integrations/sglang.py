@@ -51,6 +51,7 @@ class SGLStructuredOutputForModel(BaseIntegration):
                     item,
                     extraction_prompt_template=extraction_prompt_template,
                 )
+
                 regex = None
                 if item.type_ == "number" or item.type_ == "integer":
                     regex = RegexTypes.INTEGER.value
